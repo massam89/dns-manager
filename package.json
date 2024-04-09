@@ -1,7 +1,7 @@
 {
-  "name": "Shekan-manager",
+  "name": "dns-manager",
   "version": "1.0.0",
-  "description": "set Shekan setting",
+  "description": "Set dns by specific config",
   "main": "main.js",
   "scripts": {
     "start": "electron-forge start",
