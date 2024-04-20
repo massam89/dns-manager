@@ -1,7 +1,8 @@
 const { contextBridge, ipcRenderer } = require("electron/renderer");
 
 contextBridge.exposeInMainWorld("dns", {
-  isShekanDNS: () => ipcRenderer.invoke("isShekanDNS"),
-  disableShekan: () => ipcRenderer.invoke("disableShekan"),
-  enableShekan: () => ipcRenderer.invoke("enableShekan"),
+  isDNS: () => ipcRenderer.invoke("isDNS"),
+  disable: () => ipcRenderer.invoke("disable"),
+  enable: () => ipcRenderer.invoke("enable"),
+  DNSs: () => ipcRenderer.invoke("DNSs"),
 });

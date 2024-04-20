@@ -1,64 +1,50 @@
-// Modules to control application life and create native browser window
 const { app, BrowserWindow, Menu } = require("electron");
 const { ipcMain } = require("electron/main");
 const path = require("node:path");
 const { runCmd, checkIfExists } = require("./src/utils/helper");
-const { shekanDNSs } = require("./setting.json");
+const { DNSs } = require("./setting.json");
 
 Menu.setApplicationMenu(null);
 
 const createWindow = () => {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 300,
-    height: 200,
+    title: "DNS manager",
+    maximizable: false,
+    width: 250,
+    height: 250,
     webPreferences: {
       preload: path.join(__dirname, "src/preload.js"),
     },
   });
 
-  // and load the index.html of the app.
   mainWindow.loadFile("src/index.html");
-
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  ipcMain.handle("isShekanDNS", () => getIsShekanDNS());
-  ipcMain.handle("disableShekan", () => disableShekan());
-  ipcMain.handle("enableShekan", () => enableShekan());
+  ipcMain.handle("isDNS", () => getIsDNS());
+  ipcMain.handle("disable", () => disable());
+  ipcMain.handle("enable", () => enable());
+  ipcMain.handle("DNSs", () => DNSs);
 
   createWindow();
 
   app.on("activate", () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
-
-async function getIsShekanDNS() {
+async function getIsDNS() {
   try {
     const output = await runCmd(
       `ipconfig /all | findstr /R /C:"DNS Servers"
       exit`
     );
     const currentDNS = output.split("\n", 1)[0].split(":").pop().trim();
-    const isShekanDNS = checkIfExists(shekanDNSs, currentDNS);
+    const isShekanDNS = checkIfExists(DNSs, currentDNS);
 
     return isShekanDNS;
   } catch (error) {
@@ -66,7 +52,7 @@ async function getIsShekanDNS() {
   }
 }
 
-async function disableShekan() {
+async function disable() {
   try {
     return await runCmd(
       `netsh interface ip set dnsservers name="Wi-Fi" source=dhcp && netsh interface ip set dnsservers name="Ethernet" source=dhcp && ipconfig /flushdns
@@ -77,10 +63,10 @@ async function disableShekan() {
   }
 }
 
-async function enableShekan() {
+async function enable() {
   try {
     return await runCmd(
-      `netsh interface ipv4 add dnsservers "Wi-Fi" address=${shekanDNSs[0]} index=1 && netsh interface ipv4 add dnsservers "Wi-Fi" address=${shekanDNSs[1]} index=2 && netsh interface ipv4 add dnsservers "Ethernet" address=${shekanDNSs[0]} index=1 && netsh interface ipv4 add dnsservers "Ethernet" address=${shekanDNSs[1]} index=2 && ipconfig /flushdns
+      `netsh interface ipv4 add dnsservers "Wi-Fi" address=${DNSs[0]} index=1 && netsh interface ipv4 add dnsservers "Wi-Fi" address=${DNSs[1]} index=2 && netsh interface ipv4 add dnsservers "Ethernet" address=${DNSs[0]} index=1 && netsh interface ipv4 add dnsservers "Ethernet" address=${DNSs[1]} index=2 && ipconfig /flushdns
       exit`
     );
   } catch (error) {
