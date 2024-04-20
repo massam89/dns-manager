@@ -26,7 +26,7 @@ jobs:
 
     - name: Create and checkout build branch
       run: |
-        git checkout -b build
+        git checkout build
         git pull origin build || true
         git rm -rf .
         git checkout master -- out/
