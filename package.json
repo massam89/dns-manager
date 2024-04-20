@@ -1,5 +1,5 @@
 {
-  "name": "dns-manager",
+  "name": "@masouds/dns-manager",
   "version": "1.0.0",
   "description": "Set dns by specific config",
   "main": "main.js",
