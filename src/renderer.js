@@ -3,14 +3,31 @@
   const enable = document.getElementById("enable");
   const disable = document.getElementById("disable");
   const process = document.getElementById("process");
-  const DNSsElement = document.getElementById("DNSs");
+  const currentDNS = document.getElementById("currentDNS");
 
-  const DNSs = await window.dns.DNSs();
-  DNSs.forEach((DNS) => {
-    const liElement = document.createElement("li");
-    liElement.innerText = DNS;
-    DNSsElement.appendChild(liElement);
-  });
+  const currentDNSHandler = async (isFromListener = false) => {
+    process.innerText = "Processing";
+    const response = await window.dns.isDNS();
+
+    if (response.currentDNS.startsWith("10.") && isFromListener) {
+      alert(`Please fix the issue:
+1- Disable any VPN 
+2- Run app as administrator`);
+    }
+
+    process.innerText = "";
+    information.innerText = `${
+      response.isCurrentDNSInTheSettingFile ? "ON" : "OFF"
+    }`;
+    information.style.color = `${
+      response.isCurrentDNSInTheSettingFile ? "green" : "red"
+    }`;
+    currentDNS.innerText = response.currentDNS || "";
+    enable.disabled = response.isCurrentDNSInTheSettingFile;
+    disable.disabled = !response.isCurrentDNSInTheSettingFile;
+  };
+
+  currentDNSHandler();
 
   enable.addEventListener("click", async () => {
     process.innerText = "Processing";
@@ -20,6 +37,7 @@
     information.style.color = "green";
     enable.disabled = true;
     disable.disabled = false;
+    currentDNSHandler(true);
   });
 
   disable.addEventListener("click", async () => {
@@ -31,12 +49,4 @@
     enable.disabled = false;
     disable.disabled = true;
   });
-
-  process.innerText = "Processing";
-  const response = await window.dns.isDNS();
-  process.innerText = "";
-  information.innerText = `${response ? "ON" : "OFF"}`;
-  information.style.color = `${response ? "green" : "red"}`;
-  enable.disabled = response;
-  disable.disabled = !response;
 })();

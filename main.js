@@ -10,8 +10,8 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     title: "DNS manager",
     maximizable: false,
-    width: 250,
-    height: 250,
+    width: 300,
+    height: 280,
     webPreferences: {
       preload: path.join(__dirname, "src/preload.js"),
     },
@@ -21,7 +21,7 @@ const createWindow = () => {
 };
 
 app.whenReady().then(async () => {
-  ipcMain.handle("isDNS", () => getIsDNS());
+  ipcMain.handle("isDNS", () => getIsDNS()); // Inter-Process Communication
   ipcMain.handle("disable", () => disable());
   ipcMain.handle("enable", () => enable());
   ipcMain.handle("DNSs", () => DNSs);
@@ -44,9 +44,9 @@ async function getIsDNS() {
       exit`
     );
     const currentDNS = output.split("\n", 1)[0].split(":").pop().trim();
-    const isShekanDNS = checkIfExists(DNSs, currentDNS);
-
-    return isShekanDNS;
+    const isCurrentDNSLocalIP = currentDNS.startsWith("10.");
+    const isCurrentDNSInTheSettingFile = checkIfExists(DNSs, currentDNS);
+    return { currentDNS, isCurrentDNSLocalIP, isCurrentDNSInTheSettingFile };
   } catch (error) {
     return error;
   }
