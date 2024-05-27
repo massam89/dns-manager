@@ -7,8 +7,8 @@ on:
 
 jobs:
   release:
-    permission: read-all|write-all
     runs-on: ubuntu-latest
+    permission: read-all
 
     steps:
       - name: Checkout repository
