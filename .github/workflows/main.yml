@@ -11,6 +11,10 @@ jobs:
     permissions: write-all
 
     steps:
+      - name: echo
+        run: |
+          ls
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
