@@ -19,11 +19,9 @@ jobs:
           npm run package
 
       - name: Zip and Push
-        steps:
-          - name: Zip Folder
-            run: |
-              cd ./out/dns-manager-win32-x64
-              zip -r dns-manager-win32-x64.zip
+        run: |
+          cd ./out/dns-manager-win32-x64
+          zip -r dns-manager-win32-x64.zip
 
       - name: Create Release
         id: create_release
@@ -42,6 +40,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./out
+          asset_path: ./out/dns-manager-win32-x64/dns-manager-win32-x64.zip
           asset_name: dns-manager-win32-x64-v${{github.run_number}}.zip
           asset_content_type: application/zip
