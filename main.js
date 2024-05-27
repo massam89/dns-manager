@@ -4,7 +4,7 @@ const path = require("node:path");
 const { runCmd, checkIfExists } = require("./src/utils/helper");
 const { DNSs } = require("./setting.json");
 
-Menu.setApplicationMenu(null);
+// Menu.setApplicationMenu(null);
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -20,7 +20,7 @@ const createWindow = () => {
   mainWindow.loadFile("src/index.html");
 };
 
-app.whenReady().then(async () => {
+app.whenReady().then(() => {
   ipcMain.handle("isDNS", () => getIsDNS()); // Inter-Process Communication
   ipcMain.handle("disable", () => disable());
   ipcMain.handle("enable", () => enable());
@@ -43,12 +43,15 @@ async function getIsDNS() {
       `ipconfig /all | findstr /R /C:"DNS Servers"
       exit`
     );
-    const currentDNS = output.split("\n", 1)[0].split(":").pop().trim();
-    const isCurrentDNSLocalIP = currentDNS.startsWith("10.");
+    const currentDNS1 = output.split("\n", 2)[0].split(":").pop().trim();
+    const currentDNS2 = output.split("\n", 2)[1].split(":").pop().trim();
+    let currentDNS = currentDNS1?.length === 14 ? currentDNS1 : currentDNS2;
+
     const isCurrentDNSInTheSettingFile = checkIfExists(DNSs, currentDNS);
-    return { currentDNS, isCurrentDNSLocalIP, isCurrentDNSInTheSettingFile };
+
+    return { currentDNS, isCurrentDNSInTheSettingFile };
   } catch (error) {
-    return error;
+    console.log(error);
   }
 }
 
@@ -59,7 +62,7 @@ async function disable() {
       exit`
     );
   } catch (error) {
-    return error;
+    console.log(error);
   }
 }
 
@@ -70,6 +73,6 @@ async function enable() {
       exit`
     );
   } catch (error) {
-    return error;
+    console.log(error);
   }
 }
