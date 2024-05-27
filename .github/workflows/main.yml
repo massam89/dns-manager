@@ -3,25 +3,15 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      repository-projects: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Setup Git LFS
-        run: |
-          sudo apt-get install git-lfs
-          git lfs install
-          git lfs pull
 
       - name: Build project
         run: |
@@ -32,7 +22,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
@@ -42,9 +32,9 @@ jobs:
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./out/dns-manager-win32-x64
-          asset_name: dns-manager-win32-x64.zip
-          asset_content_type: application/octet-stream
+          asset_path: ./dns-manager-win32-x64.zip
+          asset_name: dns-manager-win32-x64-v${{github.run_number}}.zip
+          asset_content_type: application/zip
