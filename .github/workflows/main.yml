@@ -2,8 +2,8 @@ name: Release
 
 on:
   push:
-    branch:
-      - "master"
+    tags:
+      - "v*.*.*"
 
 jobs:
   release:
