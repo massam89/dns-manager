@@ -18,6 +18,13 @@ jobs:
           npm install
           npm run package
 
+      - name: Zip and Push
+        steps:
+          - name: Zip Folder
+            run: |
+              cd ./out/dns-manager-win32-x64
+              zip -r dns-manager-win32-x64.zip
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
