@@ -4,7 +4,7 @@ const path = require("node:path");
 const { runCmd, checkIfExists } = require("./src/utils/helper");
 const { DNSs } = require("./setting.json");
 
-// Menu.setApplicationMenu(null);
+Menu.setApplicationMenu(null);
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
