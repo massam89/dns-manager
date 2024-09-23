@@ -14,8 +14,7 @@
     "dns"
   ],
   "author": {
-    "name": "Masoud Sam",
-    "url": "https://masoudsam.ir"
+    "name": "Masoud Sam"
   },
   "main": "./.erb/dll/main.bundle.dev.js",
   "scripts": {
@@ -159,7 +158,7 @@
     "webpack-merge": "^5.9.0"
   },
   "build": {
-    "productName": "ElectronReact",
+    "productName": "DNSManager",
     "appId": "org.erb.ElectronReact",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
@@ -199,6 +198,7 @@
       ]
     },
     "win": {
+      "requestedExecutionLevel": "requireAdministrator",
       "target": [
         "nsis"
       ]
