@@ -8,36 +8,40 @@ function App() {
   const [selectedInterface, setSelectedInterface] = useState();
   const [areTextInputDisable, setAreTextInputDisable] = useState(false);
   const [isDNSActive, setIsDNSActive] = useState(false);
+  const [error, setError] = useState('');
 
-  const getAndSetNetworkInterfacesAndTheirDetails = useCallback(() => {
-    window.electron
-      .getNetworkInterfaces()
-      .then(async (res) => {
-        const promises = res.map(async (networkInterface: any) => {
-          const status = await window.electron.getNetworkInterfaceStatus(
+  const getAndSetNetworkInterfacesAndTheirDetails = useCallback(async () => {
+    const getNetworkInterfacesResult =
+      await window.electron.getNetworkInterfaces();
+    if (getNetworkInterfacesResult.error) {
+      setError(getNetworkInterfacesResult.data);
+      return null;
+    }
+
+    const promises = getNetworkInterfacesResult.data.map(
+      async (networkInterface: any) => {
+        const getNetworkInterfaceStatusResult =
+          await window.electron.getNetworkInterfaceStatus(
             networkInterface['Interface Name'],
           );
 
-          const kind = Object.keys(status.wordPresence).find(
-            (key) => status.wordPresence[key],
-          );
-
-          return {
-            ...networkInterface,
-            DNS: status.ipAddresses,
-            kind,
-          };
-        });
-
-        const finalUpdatedResponse: any = await Promise.all(promises);
-        setNetworkInterfaces(finalUpdatedResponse);
-
-        return '';
-      })
-
-      .catch((err) => {
-        throw new Error(`Error in getting interface list: ${err}`);
-      });
+        if (getNetworkInterfaceStatusResult.error) {
+          setError(getNetworkInterfaceStatusResult.data);
+          return null;
+        }
+        const kind = Object.keys(
+          getNetworkInterfaceStatusResult.data.wordPresence,
+        ).find((key) => getNetworkInterfaceStatusResult.data.wordPresence[key]);
+        return {
+          ...networkInterface,
+          DNS: getNetworkInterfaceStatusResult.data.ipAddresses,
+          kind,
+        };
+      },
+    );
+    const finalUpdatedResponse: any = await Promise.all(promises);
+    setNetworkInterfaces(finalUpdatedResponse);
+    return null;
   }, []);
 
   useEffect(() => {
@@ -67,23 +71,37 @@ function App() {
     setDnsInputs(updatedDns);
   };
 
-  const handleSubmitButton = (event: any) => {
+  const handleSubmitButton = async (event: any) => {
     event.preventDefault();
+    setError('');
 
     if (isDNSActive) {
-      window.electron
-        .disableCustomDNS(selectedInterface)
-        .then(() => setIsDNSActive(false))
-        .catch((err) => console.log(err));
+      const disableCustomDNSResult =
+        await window.electron.disableCustomDNS(selectedInterface);
+      if (disableCustomDNSResult.error) {
+        setError(disableCustomDNSResult.data);
+        return;
+      }
 
+      setIsDNSActive(false);
+      getAndSetNetworkInterfacesAndTheirDetails();
       return;
     }
 
     if (selectedInterface && dnsInputs[0] && dnsInputs[1]) {
-      window.electron
-        .setPrimaryAndSecondaryDNS(selectedInterface, dnsInputs)
-        .then(() => setIsDNSActive(true))
-        .catch((err) => console.log(err));
+      const setPrimaryAndSecondaryDNSResult =
+        await window.electron.setPrimaryAndSecondaryDNS(
+          selectedInterface,
+          dnsInputs,
+        );
+
+      if (setPrimaryAndSecondaryDNSResult.error) {
+        setError(setPrimaryAndSecondaryDNSResult.data);
+        return;
+      }
+
+      getAndSetNetworkInterfacesAndTheirDetails();
+      setIsDNSActive(true);
     }
   };
 
@@ -91,26 +109,47 @@ function App() {
     const selectedValue = event.target.value;
     setSelectedInterface(selectedValue);
   };
+
   return (
     <div>
       <form onSubmit={handleSubmitButton}>
-        {networkInterfaces.map((networkInterface: any) => (
-          <div key={networkInterface['Interface Name']}>
-            <input
-              onChange={handleSelectedInterface}
-              type="radio"
-              id={networkInterface['Interface Name']}
-              name="interface"
-              value={networkInterface['Interface Name']}
-              disabled={
-                networkInterface['Admin State'] === 'Disabled' || isDNSActive
-              }
-            />
-            <label htmlFor={networkInterface['Interface Name']}>
-              {`${networkInterface['Interface Name']}`}
-            </label>
-          </div>
-        ))}
+        <table
+          style={{
+            textAlign: 'center',
+            borderCollapse: 'collapse',
+            width: '100%',
+          }}
+        >
+          <tr>
+            <th>Select</th>
+            <th>InterfaceName</th>
+            <th>DNS</th>
+            <th>Kind</th>
+            <th>State</th>
+          </tr>
+          {networkInterfaces.map((networkInterface: any) => (
+            <tr>
+              <td>
+                <input
+                  onChange={handleSelectedInterface}
+                  type="radio"
+                  id={networkInterface['Interface Name']}
+                  name="interface"
+                  value={networkInterface['Interface Name']}
+                  disabled={
+                    networkInterface['Admin State'] === 'Disabled' ||
+                    isDNSActive
+                  }
+                />
+              </td>
+              <td>{networkInterface['Interface Name']}</td>
+              <td>{networkInterface.DNS.toString()}</td>
+              <td>{networkInterface.kind}</td>
+              <td>{networkInterface.State}</td>
+            </tr>
+          ))}
+        </table>
+
         <hr />
         {setting.services.map((service) => (
           <Fragment key={service.name}>
@@ -140,22 +179,32 @@ function App() {
 
         <hr />
 
-        <input
-          type="text"
-          value={dnsInputs[0]}
-          onChange={(e) => changeDnsInputs(e, 0)}
-          disabled={areTextInputDisable || isDNSActive}
-        />
-        <input
-          type="text"
-          value={dnsInputs[1]}
-          onChange={(e) => changeDnsInputs(e, 1)}
-          disabled={areTextInputDisable || isDNSActive}
-        />
+        <div>
+          <input
+            type="text"
+            value={dnsInputs[0]}
+            onChange={(e) => changeDnsInputs(e, 0)}
+            disabled={areTextInputDisable || isDNSActive}
+          />
+          <input
+            type="text"
+            value={dnsInputs[1]}
+            onChange={(e) => changeDnsInputs(e, 1)}
+            disabled={areTextInputDisable || isDNSActive}
+          />
+        </div>
+
         <hr />
-        <button style={{ display: 'block' }} type="submit">
+
+        <button
+          disabled={!selectedInterface}
+          style={{ display: 'block' }}
+          type="submit"
+        >
           {isDNSActive ? 'Reset' : 'Execute'}
         </button>
+
+        <p>{error}</p>
       </form>
     </div>
   );

@@ -1,5 +1,5 @@
 /* eslint import/prefer-default-export: off */
-import { exec } from 'child_process';
+import { execSync } from 'child_process';
 import { URL } from 'url';
 import path from 'path';
 
@@ -11,22 +11,6 @@ export function resolveHtmlPath(htmlFileName: string) {
     return url.href;
   }
   return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
-}
-
-export function runCmd(cmd: string) {
-  return new Promise((resolve, reject) => {
-    exec(cmd, (error, stdout, stderr) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      if (stderr) {
-        reject(stderr);
-        return;
-      }
-      resolve(stdout);
-    });
-  });
 }
 
 export function parseLinesToObject(dataString: string) {
@@ -58,4 +42,13 @@ export function extractIPsAndWords(text: string, wordsToCheck: string[]) {
     ipAddresses: ipMatches,
     wordPresence,
   };
+}
+
+export function syncCmd(command: string) {
+  try {
+    const output = execSync(command).toString();
+    return { error: false, data: output };
+  } catch (err: any) {
+    return { error: true, data: err.toString() };
+  }
 }

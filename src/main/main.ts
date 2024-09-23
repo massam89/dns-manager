@@ -1,30 +1,21 @@
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
-import log from 'electron-log';
-import MenuBuilder from './menu';
+import { app, BrowserWindow, shell, ipcMain, Menu } from 'electron';
+import { resolveHtmlPath } from './util';
 import {
-  extractIPsAndWords,
-  parseLinesToObject,
-  resolveHtmlPath,
-  runCmd,
-} from './util';
-
-class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-}
+  disableCustomDNS,
+  getNetworkInterfaces,
+  getNetworkInterfaceStatus,
+  setPrimaryAndSecondaryDNS,
+} from './actions';
 
 let mainWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
+  Menu.setApplicationMenu(null);
 }
 
 const isDebug =
@@ -62,8 +53,8 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: 800,
+    height: 400,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: app.isPackaged
@@ -89,18 +80,11 @@ const createWindow = async () => {
     mainWindow = null;
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
-
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
   });
-
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
 };
 
 app.on('window-all-closed', () => {
@@ -109,71 +93,13 @@ app.on('window-all-closed', () => {
   }
 });
 
-export async function getNetworkInterfaces() {
-  try {
-    const result: any = await runCmd('netsh interface show interface');
-    return parseLinesToObject(result);
-  } catch (error) {
-    return error;
-  }
-}
-
-export async function getNetworkInterfaceStatus(interfaceName: any) {
-  try {
-    const result: any = await runCmd(
-      `netsh interface ip show dns name="${interfaceName}"`,
-    );
-    return extractIPsAndWords(result, ['DHCP', 'Statically']);
-  } catch (error) {
-    return error;
-  }
-}
-
-export async function setPrimaryAndSecondaryDNS(
-  interfaceName: any,
-  dns: string[],
-) {
-  try {
-    const result = await runCmd(
-      `netsh interface ip set dnsservers "${interfaceName}" static ${dns[0]} primary & netsh interface ip add dnsservers "${interfaceName}" ${dns[1]} index=2`,
-    );
-    return result;
-  } catch (error) {
-    return error;
-  }
-}
-
-export async function disableCustomDNS(interfaceName: any) {
-  try {
-    console.log(`netsh interface ip set dnsservers "${interfaceName}" dhcp`);
-    const result = await runCmd(
-      `netsh interface ip set dnsservers "${interfaceName}" dhcp`,
-    );
-    return result;
-  } catch (error) {
-    return error;
-  }
-}
-
 app
   .whenReady()
   .then(() => {
-    ipcMain.handle('getNetworkInterfaces', () => getNetworkInterfaces());
-    ipcMain.handle(
-      'get-network-interface-status',
-      (_, networkInterfaceName) => {
-        return getNetworkInterfaceStatus(networkInterfaceName);
-      },
-    );
-    ipcMain.handle(
-      'set-primary-and-secondary-dns',
-      (_, networkInterfaceName, dns) => {
-        return setPrimaryAndSecondaryDNS(networkInterfaceName, dns);
-      },
-    );
-    ipcMain.handle('disable-custom-dns', (_, networkInterfaceName) => {
-      return disableCustomDNS(networkInterfaceName);
-    });
+    ipcMain.handle('getNetworkInterfaces', getNetworkInterfaces);
+    ipcMain.handle('get-network-interface-status', getNetworkInterfaceStatus);
+    ipcMain.handle('set-primary-and-secondary-dns', setPrimaryAndSecondaryDNS);
+    ipcMain.handle('disable-custom-dns', disableCustomDNS);
 
     createWindow();
     app.on('activate', () => {
