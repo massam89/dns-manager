@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import setting from '../../setting';
+import { throttle } from './utils';
 import './App.css';
 
 function App() {
@@ -71,8 +72,7 @@ function App() {
     setDnsInputs(updatedDns);
   };
 
-  const handleSubmitButton = async (event: any) => {
-    event.preventDefault();
+  const handleSubmitButton = throttle(async () => {
     setError('');
 
     if (isDNSActive) {
@@ -103,7 +103,7 @@ function App() {
       getAndSetNetworkInterfacesAndTheirDetails();
       setIsDNSActive(true);
     }
-  };
+  }, 10000);
 
   const handleSelectedInterface = (event: any) => {
     const selectedValue = event.target.value;
@@ -112,7 +112,12 @@ function App() {
 
   return (
     <div>
-      <form onSubmit={handleSubmitButton}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmitButton();
+        }}
+      >
         <table
           style={{
             textAlign: 'center',
@@ -120,34 +125,38 @@ function App() {
             width: '100%',
           }}
         >
-          <tr>
-            <th>Select</th>
-            <th>InterfaceName</th>
-            <th>DNS</th>
-            <th>Kind</th>
-            <th>State</th>
-          </tr>
-          {networkInterfaces.map((networkInterface: any) => (
+          <thead>
             <tr>
-              <td>
-                <input
-                  onChange={handleSelectedInterface}
-                  type="radio"
-                  id={networkInterface['Interface Name']}
-                  name="interface"
-                  value={networkInterface['Interface Name']}
-                  disabled={
-                    networkInterface['Admin State'] === 'Disabled' ||
-                    isDNSActive
-                  }
-                />
-              </td>
-              <td>{networkInterface['Interface Name']}</td>
-              <td>{networkInterface.DNS.toString()}</td>
-              <td>{networkInterface.kind}</td>
-              <td>{networkInterface.State}</td>
+              <th>Select</th>
+              <th>InterfaceName</th>
+              <th>DNS</th>
+              <th>Kind</th>
+              <th>State</th>
             </tr>
-          ))}
+          </thead>
+          <tbody>
+            {networkInterfaces.map((networkInterface: any) => (
+              <tr key={networkInterface['Interface Name']}>
+                <td>
+                  <input
+                    onChange={handleSelectedInterface}
+                    type="radio"
+                    id={networkInterface['Interface Name']}
+                    name="interface"
+                    value={networkInterface['Interface Name']}
+                    disabled={
+                      networkInterface['Admin State'] === 'Disabled' ||
+                      isDNSActive
+                    }
+                  />
+                </td>
+                <td>{networkInterface['Interface Name']}</td>
+                <td>{networkInterface.DNS.toString()}</td>
+                <td>{networkInterface.kind}</td>
+                <td>{networkInterface.State}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
 
         <hr />
