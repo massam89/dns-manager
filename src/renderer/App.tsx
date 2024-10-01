@@ -6,15 +6,19 @@ import './App.css';
 function App() {
   const [networkInterfaces, setNetworkInterfaces] = useState([]);
   const [dnsInputs, setDnsInputs] = useState(['', '']);
-  const [selectedInterface, setSelectedInterface] = useState();
+  const [selectedInterface, setSelectedInterface] = useState('');
   const [areTextInputDisable, setAreTextInputDisable] = useState(false);
   const [isDNSActive, setIsDNSActive] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const getAndSetNetworkInterfacesAndTheirDetails = useCallback(async () => {
+    setIsLoading(true);
+
     const getNetworkInterfacesResult =
       await window.electron.getNetworkInterfaces();
     if (getNetworkInterfacesResult.error) {
+      setIsLoading(false);
       setError(getNetworkInterfacesResult.data);
       return null;
     }
@@ -42,8 +46,42 @@ function App() {
     );
     const finalUpdatedResponse: any = await Promise.all(promises);
     setNetworkInterfaces(finalUpdatedResponse);
+    setIsLoading(false);
     return null;
   }, []);
+
+  const getAndSetNetworkInterfaceAndItsDetails = useCallback(
+    async (networkInterfaceName: string) => {
+      setIsLoading(true);
+
+      const getNetworkInterfaceStatusResult =
+        await window.electron.getNetworkInterfaceStatus(networkInterfaceName);
+
+      if (getNetworkInterfaceStatusResult.error) {
+        setIsLoading(false);
+        setError(getNetworkInterfaceStatusResult.data);
+        return null;
+      }
+
+      const updatedNetworkInterfaces: any = networkInterfaces.map(
+        (networkInterface: any) => {
+          if (networkInterface['Interface Name'] === networkInterfaceName) {
+            return {
+              ...networkInterface,
+              DNS: getNetworkInterfaceStatusResult.data.ipAddresses,
+            };
+          }
+
+          return networkInterface;
+        },
+      );
+
+      setNetworkInterfaces(updatedNetworkInterfaces);
+      setIsLoading(false);
+      return null;
+    },
+    [networkInterfaces],
+  );
 
   useEffect(() => {
     getAndSetNetworkInterfacesAndTheirDetails();
@@ -73,18 +111,20 @@ function App() {
   };
 
   const handleSubmitButton = throttle(async () => {
+    setIsLoading(true);
     setError('');
 
     if (isDNSActive) {
       const disableCustomDNSResult =
         await window.electron.disableCustomDNS(selectedInterface);
       if (disableCustomDNSResult.error) {
+        setIsLoading(false);
         setError(disableCustomDNSResult.data);
         return;
       }
 
       setIsDNSActive(false);
-      getAndSetNetworkInterfacesAndTheirDetails();
+      getAndSetNetworkInterfaceAndItsDetails(selectedInterface);
       return;
     }
 
@@ -96,18 +136,30 @@ function App() {
         );
 
       if (setPrimaryAndSecondaryDNSResult.error) {
+        setIsLoading(false);
         setError(setPrimaryAndSecondaryDNSResult.data);
         return;
       }
 
-      getAndSetNetworkInterfacesAndTheirDetails();
       setIsDNSActive(true);
+      getAndSetNetworkInterfaceAndItsDetails(selectedInterface);
+      setIsLoading(false);
     }
   }, 10000);
 
   const handleSelectedInterface = (event: any) => {
     const selectedValue = event.target.value;
     setSelectedInterface(selectedValue);
+  };
+
+  const getButtonText = () => {
+    if (isLoading) {
+      return 'Loading';
+    }
+    if (isDNSActive) {
+      return 'Reset';
+    }
+    return 'Execute';
   };
 
   return (
@@ -159,6 +211,15 @@ function App() {
           </tbody>
         </table>
 
+        <button
+          type="button"
+          style={{ fontSize: '0.9rem', margin: '10px 0px' }}
+          onClick={getAndSetNetworkInterfacesAndTheirDetails}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Loading' : 'Refresh list'}
+        </button>
+
         <hr />
         {setting.services.map((service) => (
           <Fragment key={service.name}>
@@ -206,17 +267,16 @@ function App() {
         <hr />
 
         <button
-          disabled={!selectedInterface}
+          disabled={!selectedInterface || isLoading}
           style={{ display: 'block' }}
           type="submit"
         >
-          {isDNSActive ? 'Reset' : 'Execute'}
+          {getButtonText()}
         </button>
 
-        <p>{error}</p>
+        <p style={{ width: '600px' }}>{error}</p>
       </form>
     </div>
   );
 }
-
 export default App;
