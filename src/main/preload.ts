@@ -13,6 +13,8 @@ const electronHandler = {
     ),
   disableCustomDNS: (networkInterfaceName: any) =>
     ipcRenderer.invoke('disable-custom-dns', networkInterfaceName),
+  getServicePing: (service: any) =>
+    ipcRenderer.invoke('get-service-ping', service),
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

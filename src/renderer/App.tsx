@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import setting from '../../setting';
-import { throttle } from './utils';
 import './App.css';
+import { extractTimeFromPingText } from './utils';
 
 function App() {
   const [networkInterfaces, setNetworkInterfaces] = useState([]);
@@ -11,12 +11,14 @@ function App() {
   const [isDNSActive, setIsDNSActive] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [services, setServices] = useState(setting.services);
 
   const getAndSetNetworkInterfacesAndTheirDetails = useCallback(async () => {
     setIsLoading(true);
 
     const getNetworkInterfacesResult =
       await window.electron.getNetworkInterfaces();
+
     if (getNetworkInterfacesResult.error) {
       setIsLoading(false);
       setError(getNetworkInterfacesResult.data);
@@ -83,6 +85,25 @@ function App() {
     [networkInterfaces],
   );
 
+  const getServicePing = useCallback(async () => {
+    const promises = services.map(async (service: any) => {
+      const getServicePingResult =
+        await window.electron.getServicePing(service);
+
+      return {
+        ...service,
+        ping: extractTimeFromPingText(getServicePingResult?.[0]?.[0]),
+      };
+    });
+    const finalUpdatedResponse: any = await Promise.all(promises);
+    setServices(finalUpdatedResponse);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    getServicePing();
+  }, [getServicePing]);
+
   useEffect(() => {
     getAndSetNetworkInterfacesAndTheirDetails();
   }, [getAndSetNetworkInterfacesAndTheirDetails]);
@@ -110,7 +131,7 @@ function App() {
     setDnsInputs(updatedDns);
   };
 
-  const handleSubmitButton = throttle(async () => {
+  const handleSubmitButton = async () => {
     setIsLoading(true);
     setError('');
 
@@ -145,7 +166,7 @@ function App() {
       getAndSetNetworkInterfaceAndItsDetails(selectedInterface);
       setIsLoading(false);
     }
-  }, 10000);
+  };
 
   const handleSelectedInterface = (event: any) => {
     const selectedValue = event.target.value;
@@ -178,8 +199,8 @@ function App() {
           }}
         >
           <thead>
-            <tr>
-              <th>Select</th>
+            <tr style={{ borderBottom: '1px solid white' }}>
+              <th>#</th>
               <th>InterfaceName</th>
               <th>DNS</th>
               <th>Kind</th>
@@ -202,10 +223,38 @@ function App() {
                     }
                   />
                 </td>
-                <td>{networkInterface['Interface Name']}</td>
-                <td>{networkInterface.DNS.toString()}</td>
-                <td>{networkInterface.kind}</td>
-                <td>{networkInterface.State}</td>
+                <td>
+                  <label
+                    style={{ display: 'block', width: '100%' }}
+                    htmlFor={networkInterface['Interface Name']}
+                  >
+                    {networkInterface['Interface Name'] || '-'}
+                  </label>{' '}
+                </td>
+                <td>
+                  <label
+                    style={{ display: 'block', width: '100%' }}
+                    htmlFor={networkInterface['Interface Name']}
+                  >
+                    {networkInterface.DNS.toString() || '-'}
+                  </label>
+                </td>
+                <td>
+                  <label
+                    style={{ display: 'block', width: '100%' }}
+                    htmlFor={networkInterface['Interface Name']}
+                  >
+                    {networkInterface.kind || '-'}
+                  </label>
+                </td>
+                <td>
+                  <label
+                    style={{ display: 'block', width: '100%' }}
+                    htmlFor={networkInterface['Interface Name']}
+                  >
+                    {networkInterface.State || '-'}
+                  </label>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -221,7 +270,7 @@ function App() {
         </button>
 
         <hr />
-        {setting.services.map((service) => (
+        {services.map((service) => (
           <Fragment key={service.name}>
             <input
               type="radio"
@@ -231,7 +280,10 @@ function App() {
               onChange={handleChangingServices}
               disabled={isDNSActive}
             />
-            <label htmlFor={service.name}>{service.name}</label>
+            <label
+              style={{ backgroundColor: service.ping ? '#599159' : '#c11212' }}
+              htmlFor={service.name}
+            >{`${service.name}=>${service.ping ? `${service.ping}ms` : 'Timeout'}`}</label>
           </Fragment>
         ))}
 
@@ -255,7 +307,9 @@ function App() {
             value={dnsInputs[0]}
             onChange={(e) => changeDnsInputs(e, 0)}
             disabled={areTextInputDisable || isDNSActive}
+            style={{ marginRight: '5px' }}
           />
+
           <input
             type="text"
             value={dnsInputs[1]}

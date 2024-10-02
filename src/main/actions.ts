@@ -2,7 +2,16 @@ import { extractIPsAndWords, parseLinesToObject, syncCmd } from './util';
 
 export function getNetworkInterfaces() {
   const result: any = syncCmd('netsh interface show interface');
-  return { ...result, data: parseLinesToObject(result.data) };
+  const parsedResult = parseLinesToObject(result.data);
+
+  const data = parsedResult.map((item: any) => ({
+    'Admin State': item[0],
+    State: item[1],
+    Type: item[2],
+    'Interface Name': item[3],
+  }));
+
+  return { ...result, data };
 }
 
 export function getNetworkInterfaceStatus(_: any, interfaceName: any) {
@@ -28,4 +37,8 @@ export function setPrimaryAndSecondaryDNS(
 
 export function disableCustomDNS(_: any, interfaceName: any) {
   return syncCmd(`netsh interface ip set dnsservers "${interfaceName}" dhcp`);
+}
+
+export function getServicePing(_: any, service: any) {
+  return parseLinesToObject(syncCmd(`ping -n 1 ${service?.dns?.[0]}`).data);
 }

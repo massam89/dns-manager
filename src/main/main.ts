@@ -7,6 +7,7 @@ import {
   disableCustomDNS,
   getNetworkInterfaces,
   getNetworkInterfaceStatus,
+  getServicePing,
   setPrimaryAndSecondaryDNS,
 } from './actions';
 
@@ -100,6 +101,7 @@ app
     ipcMain.handle('get-network-interface-status', getNetworkInterfaceStatus);
     ipcMain.handle('set-primary-and-secondary-dns', setPrimaryAndSecondaryDNS);
     ipcMain.handle('disable-custom-dns', disableCustomDNS);
+    ipcMain.handle('get-service-ping', getServicePing);
 
     createWindow();
     app.on('activate', () => {
