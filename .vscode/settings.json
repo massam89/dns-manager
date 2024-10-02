@@ -27,5 +27,5 @@
     "package-lock.json": true,
     "*.{css,sass,scss}.d.ts": true
   },
-  "cSpell.words": ["Begzar", "netsh", "Pishgaman", "Shaatel", "shecan"]
+  "cSpell.words": ["Begzar", "netsh", "Pishgaman", "Shatel", "shecan"]
 }

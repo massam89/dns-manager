@@ -86,6 +86,7 @@ function App() {
   );
 
   const getServicePing = useCallback(async () => {
+    setIsLoading(true);
     const promises = services.map(async (service: any) => {
       const getServicePingResult =
         await window.electron.getServicePing(service);
@@ -97,6 +98,7 @@ function App() {
     });
     const finalUpdatedResponse: any = await Promise.all(promises);
     setServices(finalUpdatedResponse);
+    setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -135,20 +137,6 @@ function App() {
     setIsLoading(true);
     setError('');
 
-    if (isDNSActive) {
-      const disableCustomDNSResult =
-        await window.electron.disableCustomDNS(selectedInterface);
-      if (disableCustomDNSResult.error) {
-        setIsLoading(false);
-        setError(disableCustomDNSResult.data);
-        return;
-      }
-
-      setIsDNSActive(false);
-      getAndSetNetworkInterfaceAndItsDetails(selectedInterface);
-      return;
-    }
-
     if (selectedInterface && dnsInputs[0] && dnsInputs[1]) {
       const setPrimaryAndSecondaryDNSResult =
         await window.electron.setPrimaryAndSecondaryDNS(
@@ -173,14 +161,19 @@ function App() {
     setSelectedInterface(selectedValue);
   };
 
-  const getButtonText = () => {
-    if (isLoading) {
-      return 'Loading';
+  const resetInterface = async (interfaceName: any) => {
+    setIsLoading(true);
+
+    const disableCustomDNSResult =
+      await window.electron.disableCustomDNS(interfaceName);
+    if (disableCustomDNSResult.error) {
+      setIsLoading(false);
+      setError(disableCustomDNSResult.data);
+      return;
     }
-    if (isDNSActive) {
-      return 'Reset';
-    }
-    return 'Execute';
+
+    setIsLoading(false);
+    getAndSetNetworkInterfaceAndItsDetails(interfaceName);
   };
 
   return (
@@ -191,6 +184,15 @@ function App() {
           handleSubmitButton();
         }}
       >
+        <button
+          type="button"
+          style={{ fontSize: '0.9rem', margin: '10px 0px' }}
+          onClick={getAndSetNetworkInterfacesAndTheirDetails}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Loading' : 'Refresh table'}
+        </button>
+
         <table
           style={{
             textAlign: 'center',
@@ -205,6 +207,7 @@ function App() {
               <th>DNS</th>
               <th>Kind</th>
               <th>State</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -217,10 +220,7 @@ function App() {
                     id={networkInterface['Interface Name']}
                     name="interface"
                     value={networkInterface['Interface Name']}
-                    disabled={
-                      networkInterface['Admin State'] === 'Disabled' ||
-                      isDNSActive
-                    }
+                    disabled={isLoading}
                   />
                 </td>
                 <td>
@@ -255,21 +255,38 @@ function App() {
                     {networkInterface.State || '-'}
                   </label>
                 </td>
+                <td>
+                  <button
+                    onClick={resetInterface.bind(
+                      null,
+                      networkInterface['Interface Name'],
+                    )}
+                    disabled={isLoading}
+                    type="button"
+                    style={{
+                      fontSize: '0.7rem',
+                      display: 'block',
+                    }}
+                  >
+                    Reset
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
 
+        <hr />
+
         <button
           type="button"
-          style={{ fontSize: '0.9rem', margin: '10px 0px' }}
-          onClick={getAndSetNetworkInterfacesAndTheirDetails}
+          style={{ fontSize: '0.9rem', margin: '10px 0px', display: 'block' }}
+          onClick={getServicePing}
           disabled={isLoading}
         >
-          {isLoading ? 'Loading' : 'Refresh list'}
+          {isLoading ? 'Loading' : 'Get service pings'}
         </button>
 
-        <hr />
         {services.map((service) => (
           <Fragment key={service.name}>
             <input
@@ -278,7 +295,6 @@ function App() {
               name="service"
               value={service.name}
               onChange={handleChangingServices}
-              disabled={isDNSActive}
             />
             <label
               style={{ backgroundColor: service.ping ? '#599159' : '#c11212' }}
@@ -320,12 +336,8 @@ function App() {
 
         <hr />
 
-        <button
-          disabled={!selectedInterface || isLoading}
-          style={{ display: 'block' }}
-          type="submit"
-        >
-          {getButtonText()}
+        <button disabled={isLoading} style={{ display: 'block' }} type="submit">
+          Execute
         </button>
 
         <p style={{ width: '600px' }}>{error}</p>

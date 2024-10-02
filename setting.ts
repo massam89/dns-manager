@@ -7,7 +7,7 @@ const setting = {
     { name: 'Radar', dns: ['10.202.10.10', '10.202.10.11'], ping: 0 },
     { name: 'Pishgaman', dns: ['5.202.100.100', '5.202.100.101'], ping: 0 },
     { name: 'Begzar', dns: ['185.55.225.25', '185.55.226.26'], ping: 0 },
-    { name: 'Shaatel', dns: ['85.15.1.14', '85.15.1.15'], ping: 0 },
+    { name: 'Shatel', dns: ['85.15.1.14', '85.15.1.15'], ping: 0 },
   ],
 };
 
