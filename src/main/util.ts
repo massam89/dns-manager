@@ -19,13 +19,7 @@ export function parseLinesToObject(dataString: string) {
     .filter((line) => line.trim() && !line.includes('-----'));
 
   return lines.slice(1).map((line) => {
-    const columns = line.trim().split(/\s{2,}/);
-    return {
-      'Admin State': columns[0],
-      State: columns[1],
-      Type: columns[2],
-      'Interface Name': columns[3],
-    };
+    return line.trim().split(/\s{2,}/);
   });
 }
 
