@@ -7,8 +7,6 @@ function App() {
   const [networkInterfaces, setNetworkInterfaces] = useState([]);
   const [dnsInputs, setDnsInputs] = useState(['', '']);
   const [selectedInterface, setSelectedInterface] = useState('');
-  const [areTextInputDisable, setAreTextInputDisable] = useState(false);
-  const [isDNSActive, setIsDNSActive] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [services, setServices] = useState(setting.services);
@@ -113,13 +111,6 @@ function App() {
   const handleChangingServices = (event: any) => {
     const inputValue = event.target.value;
 
-    if (inputValue === 'custom') {
-      setAreTextInputDisable(false);
-      return;
-    }
-
-    setAreTextInputDisable(true);
-
     const dnsOfSelectedService: any = setting.services.find(
       (service) => service.name === inputValue,
     )?.dns;
@@ -150,7 +141,6 @@ function App() {
         return;
       }
 
-      setIsDNSActive(true);
       getAndSetNetworkInterfaceAndItsDetails(selectedInterface);
       setIsLoading(false);
     }
@@ -303,18 +293,6 @@ function App() {
           </Fragment>
         ))}
 
-        <label htmlFor="custom">
-          <input
-            type="radio"
-            id="custom"
-            name="service"
-            value="custom"
-            onChange={handleChangingServices}
-            disabled={isDNSActive}
-          />
-          Custom
-        </label>
-
         <hr />
 
         <div>
@@ -322,7 +300,6 @@ function App() {
             type="text"
             value={dnsInputs[0]}
             onChange={(e) => changeDnsInputs(e, 0)}
-            disabled={areTextInputDisable || isDNSActive}
             style={{ marginRight: '5px' }}
           />
 
@@ -330,7 +307,6 @@ function App() {
             type="text"
             value={dnsInputs[1]}
             onChange={(e) => changeDnsInputs(e, 1)}
-            disabled={areTextInputDisable || isDNSActive}
           />
         </div>
 
