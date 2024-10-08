@@ -1,6 +1,6 @@
 {
   "name": "dns-manager",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "An app to change dns more easily",
   "keywords": [
     "electron",
