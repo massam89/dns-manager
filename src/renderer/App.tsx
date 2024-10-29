@@ -132,10 +132,11 @@ function App() {
   };
 
   const handleSubmitButton = async () => {
-    setIsLoading(true);
     setError('');
 
     if (selectedInterface && dnsInputs[0] && dnsInputs[1]) {
+      setIsLoading(true);
+
       const setPrimaryAndSecondaryDNSResult =
         await window.electron.setPrimaryAndSecondaryDNS(
           selectedInterface,
