@@ -1,6 +1,19 @@
 {
   "name": "dns-manager",
   "version": "3.0.0",
+  "description": "An app to change dns more easily",
+  "keywords": [
+    "tauri",
+    "rust",
+    "react",
+    "typescript",
+    "ts",
+    "webpack",
+    "dns"
+  ],
+  "author": {
+    "name": "Masoud Sam"
+  },
   "private": true,
   "dependencies": {
     "@tauri-apps/api": "^2.0.2",
