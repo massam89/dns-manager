@@ -40,8 +40,6 @@ function App() {
       "Interface Name": item[3],
     }));
 
-    setNetworkInterfaces(parsedNetworkInterfacesResult);
-
     const promises = parsedNetworkInterfacesResult.map(
       async (networkInterface: any) => {
         const getNetworkInterfaceStatusResult = await runCmd("netsh", [
@@ -93,7 +91,7 @@ function App() {
   const getServicePing = useCallback(async () => {
     setIsLoading(true);
 
-    const promises = services.map(async (service: any) => {
+    services.map(async (service: any, index: number) => {
       const getServicePingResult: any = await runCmd("ping", [
         "-n",
         "1",
@@ -104,14 +102,17 @@ function App() {
         getServicePingResult.stdout
       );
 
-      return {
-        ...service,
-        ping: extractTimeFromPingText(parsedServicePingResult?.[0]?.[0]),
-      };
+      setServices((prevState) => {
+        const preparedServices = [...prevState];
+        preparedServices[index] = {
+          ...service,
+          ping: extractTimeFromPingText(parsedServicePingResult?.[0]?.[0]),
+        };
+        return preparedServices;
+      });
     });
-    const finalUpdatedResponse: any = await Promise.all(promises);
-    setServices(finalUpdatedResponse);
     setIsLoading(false);
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
