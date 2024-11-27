@@ -1,12 +1,12 @@
-import React, { Fragment, useCallback, useEffect, useState } from "react";
-import "./App.css";
+import { Fragment, useCallback, useEffect, useState } from "react";
+import "App.css";
 import {
   extractIPsAndWords,
   extractTimeFromPingText,
   parseLinesToObject,
   runCmd,
-} from "./utils";
-import setting from "./setting";
+} from "utils";
+import setting from "setting";
 
 function App() {
   const [networkInterfaces, setNetworkInterfaces] = useState([]);
