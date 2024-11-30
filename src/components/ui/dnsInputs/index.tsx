@@ -1,11 +1,14 @@
+import { ChangeEvent, FC } from "react";
 import styles from "./index.module.css";
-
 interface ComponentInterface {
-  dnsInputs: any;
-  changeDnsInputs: any;
+  dnsInputs: string[];
+  changeDnsInputs: (
+    event: ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => void;
 }
 
-const DnsInputs = ({ dnsInputs, changeDnsInputs }: ComponentInterface) => {
+const DnsInputs: FC<ComponentInterface> = ({ dnsInputs, changeDnsInputs }) => {
   return (
     <div>
       <input

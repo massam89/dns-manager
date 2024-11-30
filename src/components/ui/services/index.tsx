@@ -1,19 +1,26 @@
 import { Fragment } from "react/jsx-runtime";
 import styles from "./index.module.css";
+import { ChangeEvent, FC } from "react";
+
+interface ServiceInterface {
+  name: string;
+  dns: string[];
+  ping: number | null;
+}
 
 interface ComponentInterface {
-  services: any;
-  handleChangingServices: any;
-  getServicePing: any;
+  services: ServiceInterface[];
+  handleChangingServices: (event: ChangeEvent<HTMLInputElement>) => void;
+  getServicePing: () => void;
   isLoading: boolean;
 }
 
-const Services = ({
+const Services: FC<ComponentInterface> = ({
   services,
   handleChangingServices,
   getServicePing,
   isLoading,
-}: ComponentInterface) => {
+}) => {
   return (
     <>
       <button

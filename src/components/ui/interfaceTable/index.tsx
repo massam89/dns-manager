@@ -1,20 +1,28 @@
+import { ChangeEvent, FC } from "react";
 import styles from "./index.module.css";
-
-interface ComponentInterface {
-  getAndSetNetworkInterfacesAndTheirDetails: any;
-  isLoading: boolean;
-  networkInterfaces: any;
-  handleSelectedInterface: any;
-  resetInterface: any;
+interface NetworkInterface {
+  "Interface Name": string;
+  DNS: string[];
+  kind: string;
+  State: string;
+  type: string;
 }
 
-const InterfaceTable = ({
+interface ComponentInterface {
+  getAndSetNetworkInterfacesAndTheirDetails: () => void;
+  isLoading: boolean;
+  networkInterfaces: NetworkInterface[];
+  handleSelectedInterface: (event: ChangeEvent<HTMLInputElement>) => void;
+  resetInterface: (interfaceName: string) => void;
+}
+
+const InterfaceTable: FC<ComponentInterface> = ({
   getAndSetNetworkInterfacesAndTheirDetails,
   isLoading,
   networkInterfaces,
   handleSelectedInterface,
   resetInterface,
-}: ComponentInterface) => {
+}) => {
   return (
     <>
       <button

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, FC } from "react";
 import {
   extractIPsAndWords,
   extractPingTimeFromPingText,
@@ -10,7 +10,7 @@ import InterfaceTable from "components/ui/interfaceTable";
 import Services from "components/ui/services";
 import DnsInputs from "components/ui/dnsInputs";
 
-const App = () => {
+const App: FC = () => {
   const [networkInterfaces, setNetworkInterfaces] = useState([]);
   const [dnsInputs, setDnsInputs] = useState(["", ""]);
   const [selectedInterface, setSelectedInterface] = useState("");
