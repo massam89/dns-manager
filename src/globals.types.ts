@@ -1,19 +1,19 @@
 export type DNSs = [string, string];
 
-export interface NetworkInterface {
+export type NetworkInterface = {
   "Interface Name": string;
   DNS: DNSs;
   kind: string;
   State: string;
   type: string;
-}
+};
 
-export interface ServiceInterface {
+export type ServiceInterface = {
   name: string;
   dns: DNSs;
   ping: number | null;
-}
+};
 
-export interface Setting {
+export type Setting = {
   services: ServiceInterface[];
-}
+};

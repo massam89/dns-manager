@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, FC } from "react";
+import { useCallback, useEffect, useState, FC, ChangeEvent } from "react";
 import {
   extractIPsAndWords,
   extractPingTimeFromPingText,
@@ -22,7 +22,10 @@ const App: FC = () => {
     setting.services
   );
 
-  const changeDnsInputs = (event: any, index: number) => {
+  const changeDnsInputs = (
+    event: ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const inputValue = event.target.value;
     const updatedDns: DNSs = [...dnsInputs];
     updatedDns[index] = inputValue;
@@ -48,7 +51,7 @@ const App: FC = () => {
     }));
 
     const promises = parsedNetworkInterfacesResult.map(
-      async (networkInterface: any) => {
+      async (networkInterface: NetworkInterface) => {
         const getNetworkInterfaceStatusResult = await runCmd("netsh", [
           "interface",
           "ip",
@@ -72,7 +75,9 @@ const App: FC = () => {
         };
       }
     );
-    const finalUpdatedResponse: any = await Promise.all(promises);
+    const finalUpdatedResponse: NetworkInterface[] = await Promise.all(
+      promises
+    );
     setNetworkInterfaces(finalUpdatedResponse);
     setIsLoading(false);
   }, []);
@@ -81,12 +86,12 @@ const App: FC = () => {
     getAndSetNetworkInterfacesAndTheirDetails();
   }, [getAndSetNetworkInterfacesAndTheirDetails]);
 
-  const handleSelectedInterface = (event: any) => {
+  const handleSelectedInterface = (event: ChangeEvent<HTMLInputElement>) => {
     const selectedValue = event.target.value;
     setSelectedInterface(selectedValue);
   };
 
-  const handleChangingServices = (event: any) => {
+  const handleChangingServices = (event: ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
 
     const dnsOfSelectedService: any = setting.services.find(
@@ -98,7 +103,7 @@ const App: FC = () => {
   const getServicePing = useCallback(async () => {
     setIsLoading(true);
 
-    services.map(async (service: any, index: number) => {
+    services.map(async (service: ServiceInterface, index: number) => {
       const getServicePingResult: any = await runCmd("ping", [
         "-n",
         "1",
@@ -130,7 +135,7 @@ const App: FC = () => {
     if (selectedInterface && dnsInputs[0] && dnsInputs[1]) {
       setIsLoading(true);
 
-      await runCmd("netsh", [
+      const primaryCommandArray: string[] = [
         "interface",
         "ip",
         "set",
@@ -139,8 +144,10 @@ const App: FC = () => {
         "static",
         dnsInputs[0],
         "primary",
-      ]);
-      await runCmd("netsh", [
+      ];
+      await runCmd("netsh", primaryCommandArray);
+
+      const secondaryCommandArray: string[] = [
         "interface",
         "ip",
         "add",
@@ -148,24 +155,27 @@ const App: FC = () => {
         `"${selectedInterface}"`,
         dnsInputs[1],
         "index=2",
-      ]);
+      ];
+      await runCmd("netsh", secondaryCommandArray);
 
       getAndSetNetworkInterfacesAndTheirDetails();
       setIsLoading(false);
     }
   };
 
-  const resetInterface = async (interfaceName: any) => {
+  const resetInterface = async (interfaceName: string) => {
     setIsLoading(true);
 
-    await runCmd("netsh", [
+    const resetCommandArray = [
       "interface",
       "ip",
       "set",
       "dnsservers",
       `"${interfaceName}"`,
       "dhcp",
-    ]);
+    ];
+
+    await runCmd("netsh", resetCommandArray);
 
     getAndSetNetworkInterfacesAndTheirDetails();
     setIsLoading(false);
@@ -187,16 +197,22 @@ const App: FC = () => {
         handleSelectedInterface={handleSelectedInterface}
         resetInterface={resetInterface}
       />
+
       <hr />
+
       <Services
         services={services}
         handleChangingServices={handleChangingServices}
         getServicePing={getServicePing}
         isLoading={isLoading}
       />
+
       <hr />
+
       <DnsInputs dnsInputs={dnsInputs} changeDnsInputs={changeDnsInputs} />
+
       <hr />
+
       <button disabled={isLoading} type="submit">
         Execute
       </button>
