@@ -9,17 +9,22 @@ import setting from "setting";
 import InterfaceTable from "components/ui/interfaceTable";
 import Services from "components/ui/services";
 import DnsInputs from "components/ui/dnsInputs";
+import { DNSs, NetworkInterface, ServiceInterface } from "globals.types";
 
 const App: FC = () => {
-  const [networkInterfaces, setNetworkInterfaces] = useState([]);
-  const [dnsInputs, setDnsInputs] = useState(["", ""]);
-  const [selectedInterface, setSelectedInterface] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [services, setServices] = useState(setting.services);
+  const [networkInterfaces, setNetworkInterfaces] = useState<
+    NetworkInterface[]
+  >([]);
+  const [dnsInputs, setDnsInputs] = useState<DNSs>(["", ""]);
+  const [selectedInterface, setSelectedInterface] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [services, setServices] = useState<ServiceInterface[]>(
+    setting.services
+  );
 
   const changeDnsInputs = (event: any, index: number) => {
     const inputValue = event.target.value;
-    const updatedDns = [...dnsInputs];
+    const updatedDns: DNSs = [...dnsInputs];
     updatedDns[index] = inputValue;
     setDnsInputs(updatedDns);
   };

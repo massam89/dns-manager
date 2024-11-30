@@ -1,7 +1,8 @@
 import { ChangeEvent, FC } from "react";
 import styles from "./index.module.css";
+import { DNSs } from "globals.types";
 interface ComponentInterface {
-  dnsInputs: string[];
+  dnsInputs: DNSs;
   changeDnsInputs: (
     event: ChangeEvent<HTMLInputElement>,
     index: number

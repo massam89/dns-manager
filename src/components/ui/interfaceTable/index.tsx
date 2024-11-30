@@ -1,12 +1,6 @@
 import { ChangeEvent, FC } from "react";
 import styles from "./index.module.css";
-interface NetworkInterface {
-  "Interface Name": string;
-  DNS: string[];
-  kind: string;
-  State: string;
-  type: string;
-}
+import { NetworkInterface } from "globals.types";
 
 interface ComponentInterface {
   getAndSetNetworkInterfacesAndTheirDetails: () => void;

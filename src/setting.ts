@@ -1,3 +1,5 @@
+import { Setting } from "globals.types";
+
 /**
  * Defines the configuration settings for various DNS services.
  *
@@ -8,7 +10,7 @@
  *
  * This configuration is used to provide users with a list of DNS service options to choose from.
  */
-const setting = {
+const setting: Setting = {
   services: [
     { name: "Shecan", dns: ["178.22.122.100", "185.51.200.2"], ping: 0 },
     { name: "403", dns: ["10.202.10.202", "10.202.10.102"], ping: 0 },

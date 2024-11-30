@@ -1,12 +1,7 @@
 import { Fragment } from "react/jsx-runtime";
 import styles from "./index.module.css";
 import { ChangeEvent, FC } from "react";
-
-interface ServiceInterface {
-  name: string;
-  dns: string[];
-  ping: number | null;
-}
+import { ServiceInterface } from "globals.types";
 
 interface ComponentInterface {
   services: ServiceInterface[];
