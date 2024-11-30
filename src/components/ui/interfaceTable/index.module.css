@@ -1,0 +1,24 @@
+.refresh_btn {
+  font-size: 0.9rem;
+  margin: 10px 0px;
+}
+
+.table {
+  text-align: center;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.tr {
+  border-bottom: 1px solid white;
+}
+
+.label {
+  width: 100%;
+  display: block;
+}
+
+.reset_btn {
+  display: block;
+  font-size: 0.7rem;
+}

@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "App.css";
 import {
   extractIPsAndWords,
@@ -7,8 +7,11 @@ import {
   runCmd,
 } from "utils";
 import setting from "setting";
+import InterfaceTable from "components/ui/interfaceTable";
+import Services from "components/ui/services";
+import DnsInputs from "components/ui/dnsInputs";
 
-function App() {
+const App = () => {
   const [networkInterfaces, setNetworkInterfaces] = useState([]);
   const [dnsInputs, setDnsInputs] = useState(["", ""]);
   const [selectedInterface, setSelectedInterface] = useState("");
@@ -171,151 +174,30 @@ function App() {
         handleSubmitButton();
       }}
     >
-      <button
-        type="button"
-        style={{ fontSize: "0.9rem", margin: "10px 0px" }}
-        onClick={getAndSetNetworkInterfacesAndTheirDetails}
-        disabled={isLoading}
-      >
-        {isLoading ? "Loading" : "Refresh table"}
-      </button>
-
-      <table
-        style={{
-          textAlign: "center",
-          borderCollapse: "collapse",
-          width: "100%",
-        }}
-      >
-        <thead>
-          <tr style={{ borderBottom: "1px solid white" }}>
-            <th>#</th>
-            <th>InterfaceName</th>
-            <th>DNS</th>
-            <th>Kind</th>
-            <th>State</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {networkInterfaces.map((networkInterface: any) => (
-            <tr key={networkInterface["Interface Name"]}>
-              <td>
-                <input
-                  onChange={handleSelectedInterface}
-                  type="radio"
-                  id={networkInterface["Interface Name"]}
-                  name="interface"
-                  value={networkInterface["Interface Name"]}
-                  disabled={isLoading}
-                />
-              </td>
-              <td>
-                <label
-                  style={{ display: "block", width: "100%" }}
-                  htmlFor={networkInterface["Interface Name"]}
-                >
-                  {networkInterface["Interface Name"] || "-"}
-                </label>{" "}
-              </td>
-              <td>
-                <label
-                  style={{ display: "block", width: "100%" }}
-                  htmlFor={networkInterface["Interface Name"]}
-                >
-                  {networkInterface?.DNS?.toString() || "-"}
-                </label>
-              </td>
-              <td>
-                <label
-                  style={{ display: "block", width: "100%" }}
-                  htmlFor={networkInterface["Interface Name"]}
-                >
-                  {networkInterface.kind || "-"}
-                </label>
-              </td>
-              <td>
-                <label
-                  style={{ display: "block", width: "100%" }}
-                  htmlFor={networkInterface["Interface Name"]}
-                >
-                  {networkInterface.State || "-"}
-                </label>
-              </td>
-              <td>
-                <button
-                  onClick={resetInterface.bind(
-                    null,
-                    networkInterface["Interface Name"]
-                  )}
-                  disabled={isLoading}
-                  type="button"
-                  style={{
-                    fontSize: "0.7rem",
-                    display: "block",
-                  }}
-                >
-                  Reset
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
+      <InterfaceTable
+        getAndSetNetworkInterfacesAndTheirDetails={
+          getAndSetNetworkInterfacesAndTheirDetails
+        }
+        isLoading={isLoading}
+        networkInterfaces={networkInterfaces}
+        handleSelectedInterface={handleSelectedInterface}
+        resetInterface={resetInterface}
+      />
       <hr />
-
-      <button
-        type="button"
-        style={{ fontSize: "0.9rem", margin: "10px 0px", display: "block" }}
-        onClick={getServicePing}
-        disabled={isLoading}
-      >
-        {isLoading ? "Loading" : "Get service pings"}
-      </button>
-
-      {services.map((service) => (
-        <Fragment key={service.name}>
-          <input
-            type="radio"
-            id={service.name}
-            name="service"
-            value={service.name}
-            onChange={handleChangingServices}
-          />
-          <label
-            style={{ backgroundColor: service.ping ? "#599159" : "#c11212" }}
-            htmlFor={service.name}
-          >{`${service.name}=>${
-            service.ping ? `${service.ping}ms` : "Timeout"
-          }`}</label>
-        </Fragment>
-      ))}
-
+      <Services
+        services={services}
+        handleChangingServices={handleChangingServices}
+        getServicePing={getServicePing}
+        isLoading={isLoading}
+      />
       <hr />
-
-      <div>
-        <input
-          type="text"
-          value={dnsInputs[0]}
-          onChange={(e) => changeDnsInputs(e, 0)}
-          style={{ marginRight: "5px" }}
-        />
-
-        <input
-          type="text"
-          value={dnsInputs[1]}
-          onChange={(e) => changeDnsInputs(e, 1)}
-        />
-      </div>
-
+      <DnsInputs dnsInputs={dnsInputs} changeDnsInputs={changeDnsInputs} />
       <hr />
-
-      <button disabled={isLoading} style={{ display: "block" }} type="submit">
+      <button disabled={isLoading} type="submit">
         Execute
       </button>
     </form>
   );
-}
+};
 
 export default App;

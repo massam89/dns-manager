@@ -1,0 +1,12 @@
+.refresh_btn {
+  font-size: 0.9rem;
+  margin: 10px 0px;
+}
+
+.active {
+  background-color: #599159;
+}
+
+.inactive {
+  background-color: #c11212;
+}
