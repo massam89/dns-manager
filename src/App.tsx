@@ -2,7 +2,7 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import "App.css";
 import {
   extractIPsAndWords,
-  extractTimeFromPingText,
+  extractPingTimeFromPingText,
   parseLinesToObject,
   runCmd,
 } from "utils";
@@ -106,7 +106,7 @@ function App() {
         const preparedServices = [...prevState];
         preparedServices[index] = {
           ...service,
-          ping: extractTimeFromPingText(parsedServicePingResult?.[0]?.[0]),
+          ping: extractPingTimeFromPingText(parsedServicePingResult?.[0]?.[0]),
         };
         return preparedServices;
       });
