@@ -1,16 +1,16 @@
 import { ChangeEvent, FC } from "react";
 import styles from "./index.module.css";
-import { NetworkInterface } from "globals.types";
+import { NetworkType } from "globals.types";
 
-interface ComponentInterface {
+type ComponentType = {
   getAndSetNetworkInterfacesAndTheirDetails: () => void;
   isLoading: boolean;
-  networkInterfaces: NetworkInterface[];
+  networkInterfaces: NetworkType[];
   handleSelectedInterface: (event: ChangeEvent<HTMLInputElement>) => void;
   resetInterface: (interfaceName: string) => void;
-}
+};
 
-const InterfaceTable: FC<ComponentInterface> = ({
+const InterfaceTable: FC<ComponentType> = ({
   getAndSetNetworkInterfacesAndTheirDetails,
   isLoading,
   networkInterfaces,

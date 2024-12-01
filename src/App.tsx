@@ -9,25 +9,21 @@ import setting from "setting";
 import InterfaceTable from "components/ui/interfaceTable";
 import Services from "components/ui/services";
 import DnsInputs from "components/ui/dnsInputs";
-import { DNSs, NetworkInterface, ServiceInterface } from "globals.types";
+import { DNSsType, NetworkType, ServiceType } from "globals.types";
 
 const App: FC = () => {
-  const [networkInterfaces, setNetworkInterfaces] = useState<
-    NetworkInterface[]
-  >([]);
-  const [dnsInputs, setDnsInputs] = useState<DNSs>(["", ""]);
+  const [networkInterfaces, setNetworkInterfaces] = useState<NetworkType[]>([]);
+  const [dnsInputs, setDnsInputs] = useState<DNSsType>(["", ""]);
   const [selectedInterface, setSelectedInterface] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [services, setServices] = useState<ServiceInterface[]>(
-    setting.services
-  );
+  const [services, setServices] = useState<ServiceType[]>(setting.services);
 
   const changeDnsInputs = (
     event: ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
     const inputValue = event.target.value;
-    const updatedDns: DNSs = [...dnsInputs];
+    const updatedDns: DNSsType = [...dnsInputs];
     updatedDns[index] = inputValue;
     setDnsInputs(updatedDns);
   };
@@ -51,7 +47,7 @@ const App: FC = () => {
     }));
 
     const promises = parsedNetworkInterfacesResult.map(
-      async (networkInterface: NetworkInterface) => {
+      async (networkInterface: NetworkType) => {
         const getNetworkInterfaceStatusResult = await runCmd("netsh", [
           "interface",
           "ip",
@@ -75,9 +71,7 @@ const App: FC = () => {
         };
       }
     );
-    const finalUpdatedResponse: NetworkInterface[] = await Promise.all(
-      promises
-    );
+    const finalUpdatedResponse: NetworkType[] = await Promise.all(promises);
     setNetworkInterfaces(finalUpdatedResponse);
     setIsLoading(false);
   }, []);
@@ -103,7 +97,7 @@ const App: FC = () => {
   const getServicePing = useCallback(async () => {
     setIsLoading(true);
 
-    services.map(async (service: ServiceInterface, index: number) => {
+    services.map(async (service: ServiceType, index: number) => {
       const getServicePingResult: any = await runCmd("ping", [
         "-n",
         "1",

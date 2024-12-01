@@ -1,16 +1,16 @@
 import { Fragment } from "react/jsx-runtime";
 import styles from "./index.module.css";
 import { ChangeEvent, FC } from "react";
-import { ServiceInterface } from "globals.types";
+import { ServiceType } from "globals.types";
 
-interface ComponentInterface {
-  services: ServiceInterface[];
+type ComponentType = {
+  services: ServiceType[];
   handleChangingServices: (event: ChangeEvent<HTMLInputElement>) => void;
   getServicePing: () => void;
   isLoading: boolean;
-}
+};
 
-const Services: FC<ComponentInterface> = ({
+const Services: FC<ComponentType> = ({
   services,
   handleChangingServices,
   getServicePing,
