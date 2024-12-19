@@ -27,23 +27,28 @@ const Services: FC<ComponentType> = ({
         {isLoading ? "Loading" : "Get service pings"}
       </button>
 
-      {services.map((service: any) => (
-        <Fragment key={service.name}>
-          <input
-            type="radio"
-            id={service.name}
-            name="service"
-            value={service.name}
-            onChange={handleChangingServices}
-          />
-          <label
-            className={service.ping ? styles.active : styles.inactive}
-            htmlFor={service.name}
-          >{`${service.name}=>${
-            service.ping ? `${service.ping}ms` : "Timeout"
-          }`}</label>
-        </Fragment>
-      ))}
+      <view className={styles.services}>
+        {services.map((service: any) => (
+          <view className={styles.service} key={service.name}>
+            <input
+              type="radio"
+              id={service.name}
+              name="service"
+              value={service.name}
+              onChange={handleChangingServices}
+            />
+            <label htmlFor={service.name}>
+              {`${service.name} - `}
+              <span
+                className={service.ping[0] ? styles.active : styles.inactive}
+              >{`${service.ping[0] ? `${service.ping[0]}` : "Er"}`}</span>
+              <span
+                className={service.ping[1] ? styles.active : styles.inactive}
+              >{`${service.ping[1] ? `${service.ping[1]}` : "Er"}`}</span>
+            </label>
+          </view>
+        ))}
+      </view>
     </>
   );
 };

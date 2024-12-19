@@ -98,21 +98,38 @@ const App: FC = () => {
     setIsLoading(true);
 
     services.map(async (service: ServiceType, index: number) => {
-      const getServicePingResult: any = await runCmd("ping", [
+      const getServicePrimaryPingResult: any = await runCmd("ping", [
         "-n",
         "1",
         service?.dns?.[0],
       ]);
 
-      const parsedServicePingResult = parseLinesToObject(
-        getServicePingResult.stdout
+      const parsedServicePrimaryPingResult = parseLinesToObject(
+        getServicePrimaryPingResult.stdout
+      );
+
+      const getServiceSecondaryPingResult: any = await runCmd("ping", [
+        "-n",
+        "1",
+        service?.dns?.[0],
+      ]);
+
+      const parsedServiceSecondaryPingResult = parseLinesToObject(
+        getServiceSecondaryPingResult.stdout
       );
 
       setServices((prevState) => {
         const preparedServices = [...prevState];
         preparedServices[index] = {
           ...service,
-          ping: extractPingTimeFromPingText(parsedServicePingResult?.[0]?.[0]),
+          ping: [
+            extractPingTimeFromPingText(
+              parsedServicePrimaryPingResult?.[0]?.[0]
+            ),
+            extractPingTimeFromPingText(
+              parsedServiceSecondaryPingResult?.[0]?.[0]
+            ),
+          ],
         };
         return preparedServices;
       });

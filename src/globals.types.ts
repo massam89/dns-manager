@@ -11,7 +11,7 @@ export type NetworkType = {
 export type ServiceType = {
   name: string;
   dns: DNSsType;
-  ping: number | null;
+  ping: [number | null, number | null];
 };
 
 export type SettingType = {
