@@ -111,7 +111,7 @@ const App: FC = () => {
       const getServiceSecondaryPingResult: any = await runCmd("ping", [
         "-n",
         "1",
-        service?.dns?.[0],
+        service?.dns?.[1],
       ]);
 
       const parsedServiceSecondaryPingResult = parseLinesToObject(
